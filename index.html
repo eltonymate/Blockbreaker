@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>🎮 Block Breaker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="userPanel">
+    <div id="loginSection" class="user-section">
+      <h2>Connexion</h2>
+      <div id="loginForm">
+        <input type="text" id="loginNickname" placeholder="Nickname" required>
+        <input type="email" id="loginEmail" placeholder="Email" required>
+        <button id="loginBtn">Se connecter</button>
+      </div>
+      <p>Pas encore inscrit? <a href="#" id="showRegisterLink">S'inscrire</a></p>
+    </div>
+
+    <div id="registerSection" class="user-section" style="display:none">
+      <h2>Inscription</h2>
+      <div id="registerForm">
+        <input type="text" id="registerNickname" placeholder="Nickname" required>
+        <input type="email" id="registerEmail" placeholder="Email" required>
+        <button id="registerBtn">S'inscrire</button>
+      </div>
+      <p>Déjà inscrit? <a href="#" id="showLoginLink">Se connecter</a></p>
+    </div>
+
+    <div id="userInfoSection" class="user-section" style="display:none">
+      <h2>Joueur</h2>
+      <p>Nickname: <span id="userNickname"></span></p>
+      <p>Email: <span id="userEmail"></span></p>
+      <button id="logoutBtn">Déconnexion</button>
+    </div>
+  </div>
+
+  <h1>🎮 Block Breaker</h1>
+  <div id="scoreBoard">Score: 0</div>
+  <canvas id="gameCanvas" width="480" height="320"></canvas>
+  <div id="message"></div>
+  <button id="restartBtn" style="display:none;">Rejouer</button>
+
+  <script src="game.js"></script>
+  <script src="user.js"></script>
+</body>
+</html>
