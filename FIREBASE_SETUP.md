@@ -23,16 +23,42 @@ Pour utiliser ce jeu avec Firebase, suivez les étapes ci-dessous:
 
 ## 4. Configurer les règles de sécurité Firestore
 
-Utilisez ces règles de base pour Firestore:
+Voici des règles avancées recommandées pour votre application Block Breaker:
 
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Autoriser l'accès en lecture au classement pour tout le monde
+    // Fonction pour vérifier si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Fonction pour vérifier si l'utilisateur est le propriétaire du document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    // Fonction pour vérifier si les données sont valides pour un utilisateur
+    function isValidUserData(data) {
+      return data.keys().hasAll(['nickname', 'email', 'bestScore', 'scores', 'uid']) 
+         && data.nickname is string
+         && data.email is string
+         && data.uid is string
+         && data.uid == request.auth.uid
+         && data.bestScore is number
+         && data.scores is list;
+    }
+    
+    // Règles pour la collection 'users'
     match /users/{userId} {
+      // Tout le monde peut lire les données utilisateur (pour le classement)
       allow read;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // Seul l'utilisateur authentifié peut modifier son propre document
+      allow write: if isAuthenticated() 
+                   && isOwner(userId) 
+                   && isValidUserData(request.resource.data);
     }
   }
 }
