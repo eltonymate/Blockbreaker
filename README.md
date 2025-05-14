@@ -4,21 +4,21 @@
 
 Ce projet est divisé en 3 parties distinctes pour permettre à chaque membre de l'équipe de travailler simultanément sur différents aspects du jeu:
 
-### Personne 1 - Mécanique du jeu (game.js)
+### Personne 1 - Mécanique du jeu (game.js) - Maéva
 - Développement de la logique du jeu
 - Gestion des collisions
 - Animations et mouvements
 - Mécanique des briques et du paddle
 - Fichier principal: **game.js**
 
-### Personne 2 - Design et CSS (style.css)
+### Personne 2 - Design et CSS (style.css) - Jonas
 - Aspect visuel et esthétique du jeu
 - Effets visuels et animations CSS
 - Interface utilisateur responsive
 - Personnalisation des éléments visuels
 - Fichier principal: **style.css**
 
-### Personne 3 - Système d'authentification (user.js)
+### Personne 3 - Système d'authentification (user.js) - Samuele
 - Gestion des utilisateurs (inscription/connexion)
 - Sauvegarde des scores
 - Gestion des profils utilisateurs

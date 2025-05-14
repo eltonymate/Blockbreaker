@@ -80,6 +80,55 @@ button:hover {
   box-shadow: 0 0 30px rgba(0, 247, 255, 0.3);
 }
 
+#leaderboardSection {
+  width: 80%;
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  border: 2px solid #00f7ff;
+}
+
+#leaderboardTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  color: white;
+}
+
+#leaderboardTable th, 
+#leaderboardTable td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 247, 255, 0.3);
+}
+
+#leaderboardTable th {
+  background-color: rgba(0, 247, 255, 0.2);
+  color: #00f7ff;
+}
+
+#leaderboardTable tr.current-user {
+  background-color: rgba(0, 247, 255, 0.2);
+  font-weight: bold;
+}
+
+#bestScore {
+  margin-top: 10px;
+  font-size: 1.1em;
+  color: #ffcc00;
+}
+
+#showLeaderboardBtn {
+  margin-top: 10px;
+  background-color: #ffcc00;
+}
+
+#showLeaderboardBtn:hover {
+  background-color: #ffa500;
+}
+
 .user-section {
   margin-bottom: 20px;
 }

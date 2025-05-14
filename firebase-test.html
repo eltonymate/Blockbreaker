@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test de connexion Firebase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .status {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test de connexion Firebase</h1>
+  <div id="statusContainer"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+    const statusContainer = document.getElementById('statusContainer');
+    
+    function addStatus(message, type) {
+      const statusElement = document.createElement('div');
+      statusElement.className = `status ${type}`;
+      statusElement.textContent = message;
+      statusContainer.appendChild(statusElement);
+    }
+
+    try {
+      // Configuration Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyDGF6zqjC8-gObKnH7eZ7DoM-WZYwf6XXw",
+        authDomain: "blockbreak-b32ba.firebaseapp.com",
+        projectId: "blockbreak-b32ba",
+        storageBucket: "blockbreak-b32ba.firebasestorage.app",
+        messagingSenderId: "41456038193",
+        appId: "1:41456038193:web:40453fd5aaf12be257c010",
+        measurementId: "G-3LM5BVRLDZ"
+      };
+
+      // Initialiser Firebase
+      addStatus("Tentative d'initialisation de Firebase...", "warning");
+      const app = initializeApp(firebaseConfig);
+      addStatus("Firebase App initialisé avec succès!", "success");
+      
+      // Initialiser Analytics
+      try {
+        const analytics = getAnalytics(app);
+        addStatus("Firebase Analytics initialisé avec succès!", "success");
+      } catch (analyticsError) {
+        addStatus(`Erreur lors de l'initialisation d'Analytics: ${analyticsError.message}`, "warning");
+      }
+
+      // Tester Auth
+      try {
+        const auth = getAuth(app);
+        addStatus("Firebase Auth initialisé avec succès!", "success");
+        
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            addStatus(`Utilisateur connecté: ${user.email}`, "success");
+          } else {
+            addStatus("Aucun utilisateur n'est connecté", "warning");
+          }
+        });
+      } catch (authError) {
+        addStatus(`Erreur lors de l'initialisation d'Auth: ${authError.message}`, "error");
+      }
+
+      // Tester Firestore
+      try {
+        const db = getFirestore(app);
+        addStatus("Firebase Firestore initialisé avec succès!", "success");
+        
+        // Tester la récupération de données
+        async function testFirestore() {
+          try {
+            const querySnapshot = await getDocs(collection(db, "users"));
+            addStatus(`Récupération réussie! Nombre d'utilisateurs: ${querySnapshot.size}`, "success");
+          } catch (queryError) {
+            addStatus(`Erreur lors de la récupération des données: ${queryError.message}`, "error");
+          }
+        }
+        
+        testFirestore();
+      } catch (firestoreError) {
+        addStatus(`Erreur lors de l'initialisation de Firestore: ${firestoreError.message}`, "error");
+      }
+
+    } catch (error) {
+      addStatus(`Erreur globale: ${error.message}`, "error");
+    }
+  </script>
+</body>
+</html>

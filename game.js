@@ -126,9 +126,16 @@ function endGame(msg) {
   messageDisplay.textContent = msg;
   restartBtn.style.display = "inline-block";
   
-  // Ajouter le score à l'utilisateur connecté
-  if (typeof addScoreToUser === "function" && isUserLoggedIn()) {
-    addScoreToUser(score);
+  // Ajouter le score à l'utilisateur connecté dans Firebase
+  if (typeof addScoreToUser === "function" && typeof isUserLoggedIn === "function" && isUserLoggedIn()) {
+    // Envoyer le score à Firebase
+    addScoreToUser(score)
+      .then(() => {
+        console.log("Score sauvegardé avec succès");
+      })
+      .catch(error => {
+        console.error("Erreur lors de la sauvegarde du score:", error);
+      });
   }
 }
 
