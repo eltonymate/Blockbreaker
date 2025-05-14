@@ -106,6 +106,9 @@ logoutBtn.addEventListener("click", () => {
   currentUser = null;
   localStorage.removeItem("blockbreakerCurrentUser");
   updateUI();
+  
+  // Afficher message de déconnexion
+  alert("Vous avez été déconnecté");
 });
 
 // Fonction pour connecter un utilisateur
@@ -146,23 +149,44 @@ function isUserLoggedIn() {
 
 // Fonction pour mettre à jour l'interface utilisateur
 function updateUI() {
+  // Récupérer les sections principales
+  const authSection = document.getElementById("authSection");
+  const gameSection = document.getElementById("gameSection");
+
   if (currentUser) {
-    loginSection.style.display = "none";
-    registerSection.style.display = "none";
+    // Si l'utilisateur est connecté
+    authSection.style.display = "none";
+    gameSection.style.display = "block";
     userInfoSection.style.display = "block";
     
     userNicknameSpan.textContent = currentUser.nickname;
     userEmailSpan.textContent = currentUser.email;
+    
+    // Démarrer le jeu si la fonction existe
+    if (typeof startGame === "function") {
+      startGame();
+    }
   } else {
+    // Si l'utilisateur n'est pas connecté
+    authSection.style.display = "block";
+    gameSection.style.display = "none";
     loginSection.style.display = "block";
     registerSection.style.display = "none";
-    userInfoSection.style.display = "none";
   }
 }
 
 // Initialiser l'interface au chargement
 document.addEventListener("DOMContentLoaded", () => {
+  // Vérifier si un utilisateur est déjà connecté
   updateUI();
+  
+  // Si un utilisateur est connecté, afficher un message de bienvenue
+  if (currentUser) {
+    messageDisplay.textContent = `Bienvenue, ${currentUser.nickname}!`;
+    setTimeout(() => {
+      messageDisplay.textContent = "";
+    }, 2000);
+  }
 });
 
 // Exposer les fonctions pour les autres modules

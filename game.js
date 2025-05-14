@@ -176,10 +176,8 @@ function startGame() {
   draw();
 }
 
-// Démarrer le jeu au chargement
-document.addEventListener("DOMContentLoaded", () => {
-  startGame();
-});
+// Le jeu ne démarre plus automatiquement au chargement
+// mais seulement après connexion via la fonction updateUI() dans user.js
 
 // Exporter les fonctions pour pouvoir les utiliser dans d'autres fichiers
 window.startGame = startGame;
