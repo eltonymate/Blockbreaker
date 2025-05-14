@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Auth Firebase</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .log { padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    button { padding: 8px 12px; margin: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Test d'authentification Firebase</h1>
+  
+  <div>
+    <h2>État de connexion</h2>
+    <div id="authState" class="log info">Vérification de l'état...</div>
+  </div>
+  
+  <div>
+    <h2>Test d'inscription</h2>
+    <form id="registerForm">
+      <div>
+        <label for="registerEmail">Email:</label>
+        <input type="email" id="registerEmail" required>
+      </div>
+      <div>
+        <label for="registerPassword">Mot de passe:</label>
+        <input type="password" id="registerPassword" required>
+      </div>
+      <button type="submit">S'inscrire</button>
+    </form>
+    <div id="registerResult" class="log"></div>
+  </div>
+  
+  <div>
+    <h2>Test de connexion</h2>
+    <form id="loginForm">
+      <div>
+        <label for="loginEmail">Email:</label>
+        <input type="email" id="loginEmail" required>
+      </div>
+      <div>
+        <label for="loginPassword">Mot de passe:</label>
+        <input type="password" id="loginPassword" required>
+      </div>
+      <button type="submit">Se connecter</button>
+    </form>
+    <div id="loginResult" class="log"></div>
+  </div>
+  
+  <div>
+    <h2>Déconnexion</h2>
+    <button id="logoutBtn">Se déconnecter</button>
+    <div id="logoutResult" class="log"></div>
+  </div>
+  <div>
+    <h2>Informations de débogage</h2>
+    <div id="debugInfo" class="log info">
+      <div>URL: <span id="currentUrl"></span></div>
+      <div>Protocole: <span id="currentProtocol"></span></div>
+      <div>Hôte: <span id="currentHost"></span></div>
+    </div>
+  </div>
+  
+  <script type="module">
+    // Afficher les informations de débogage
+    document.getElementById('currentUrl').textContent = window.location.href;
+    document.getElementById('currentProtocol').textContent = window.location.protocol;
+    document.getElementById('currentHost').textContent = window.location.host;
+    
+    // Import des fonctions Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut,
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
+    
+    // Configuration Firebase (exactement la même que dans firebase-config.js)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDGF6zqjC8-gObKnH7eZ7DoM-WZYwf6XXw",
+      authDomain: "blockbreak-b32ba.firebaseapp.com",
+      projectId: "blockbreak-b32ba",
+      storageBucket: "blockbreak-b32ba.appspot.com",
+      messagingSenderId: "41456038193",
+      appId: "1:41456038193:web:40453fd5aaf12be257c010",
+      measurementId: "G-3LM5BVRLDZ"
+    };
+    
+    // Initialisation Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    // Éléments DOM
+    const authState = document.getElementById('authState');
+    const registerForm = document.getElementById('registerForm');
+    const registerResult = document.getElementById('registerResult');
+    const loginForm = document.getElementById('loginForm');
+    const loginResult = document.getElementById('loginResult');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutResult = document.getElementById('logoutResult');
+    
+    // Surveiller l'état d'authentification
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        authState.textContent = `Connecté en tant que: ${user.email}`;
+        authState.className = 'log success';
+      } else {
+        authState.textContent = 'Non connecté';
+        authState.className = 'log info';
+      }
+    });
+    
+    // Inscription
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+      
+      try {
+        registerResult.textContent = 'Inscription en cours...';
+        registerResult.className = 'log info';
+        
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        registerResult.textContent = `Inscription réussie: ${user.email}`;
+        registerResult.className = 'log success';
+      } catch (error) {
+        registerResult.textContent = `Erreur: ${error.message} (${error.code})`;
+        registerResult.className = 'log error';
+        console.error('Erreur détaillée:', error);
+      }
+    });
+    
+    // Connexion
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      try {
+        loginResult.textContent = 'Connexion en cours...';
+        loginResult.className = 'log info';
+        
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        loginResult.textContent = `Connexion réussie: ${user.email}`;
+        loginResult.className = 'log success';
+      } catch (error) {
+        loginResult.textContent = `Erreur: ${error.message} (${error.code})`;
+        loginResult.className = 'log error';
+        console.error('Erreur détaillée:', error);
+      }
+    });
+    
+    // Déconnexion
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        logoutResult.textContent = 'Déconnexion en cours...';
+        logoutResult.className = 'log info';
+        
+        await signOut(auth);
+        
+        logoutResult.textContent = 'Déconnexion réussie';
+        logoutResult.className = 'log success';
+      } catch (error) {
+        logoutResult.textContent = `Erreur: ${error.message}`;
+        logoutResult.className = 'log error';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification des domaines Firebase</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    .log {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #results {
+      margin-top: 20px;
+    }
+    .domain-help {
+      background: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border: 1px solid #ffeeba;
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Vérification des domaines Firebase</h1>
+  
+  <div class="domain-help">
+    <h2>⚠️ Important : Configuration des domaines</h2>
+    <p>Pour que Firebase Authentication fonctionne en local, vous devez ajouter les domaines suivants à la liste des domaines autorisés dans votre projet Firebase :</p>
+    <ul>
+      <li><strong>localhost</strong></li>
+      <li><strong>127.0.0.1</strong></li>
+    </ul>
+    <p><a href="https://console.firebase.google.com/project/blockbreak-b32ba/authentication/settings" target="_blank">Ouvrir les paramètres Firebase Auth →</a></p>
+  </div>
+
+  <button id="checkSetup">Vérifier la configuration Firebase</button>
+  <div id="results"></div>
+
+  <script type="module" src="firebase-domain-check.js"></script>
+  <script type="module">
+    document.getElementById('checkSetup').addEventListener('click', () => {
+      // Effacer les résultats précédents
+      document.getElementById('results').innerHTML = '';
+      // Exécuter la vérification
+      window.checkFirebaseSetup();
+    });
+  </script>
+</body>
+</html>

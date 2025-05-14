@@ -67,8 +67,20 @@
       </tbody>
     </table>
     <button id="backToGameBtn">Retour au jeu</button>
-  </div>
+  </div>  <!-- Affichage des erreurs -->
+  <div id="errorMessage" style="display:none; background-color: #f8d7da; color: #721c24; padding: 10px; margin: 10px; border-radius: 5px;"></div>
+  
   <!-- Firebase SDK -->
+  <script type="module">
+    // Vérifiez si Firebase est bien chargé
+    window.handleFirebaseError = function(error) {
+      console.error("Erreur Firebase:", error);
+      const errorMessage = document.getElementById("errorMessage");
+      errorMessage.textContent = `Erreur: ${error.message} (${error.code})`;
+      errorMessage.style.display = "block";
+    };
+  </script>
+  
   <script type="module" src="firebase-config.js"></script>
   <script type="module" src="user-firebase.js"></script>
   <script src="game.js"></script>

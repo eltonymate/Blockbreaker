@@ -87,36 +87,70 @@ registerBtn.addEventListener("click", async () => {
   }
 
   try {
-    // Vérifier si le nickname est déjà utilisé
-    const nicknameQuery = query(collection(db, "users"));
-    const querySnapshot = await getDocs(nicknameQuery);
-    const isNicknameExists = querySnapshot.docs.some(
-      doc => doc.data().nickname === nickname
-    );
+    console.log("Début de l'inscription pour:", email);
     
-    if (isNicknameExists) {
-      alert("Ce nickname est déjà utilisé");
-      return;
+    // Vérifier si Firebase est initialisé correctement
+    if (!auth) {
+      throw new Error("Firebase Auth n'est pas initialisé correctement");
+    }
+    
+    // Vérifier si le nickname est déjà utilisé
+    try {
+      const nicknameQuery = query(collection(db, "users"));
+      const querySnapshot = await getDocs(nicknameQuery);
+      const isNicknameExists = querySnapshot.docs.some(
+        doc => doc.data().nickname === nickname
+      );
+      
+      if (isNicknameExists) {
+        alert("Ce nickname est déjà utilisé");
+        return;
+      }
+    } catch (dbError) {
+      console.error("Erreur lors de la vérification du nickname:", dbError);
+      // Continuer l'inscription même si la vérification échoue
     }
     
     // Créer le compte dans Firebase Auth
+    console.log("Tentative de création du compte...");
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log("Compte créé avec succès:", user.uid);
     
     // Créer un document utilisateur dans Firestore
-    await setDoc(doc(db, "users", user.uid), {
-      uid: user.uid,
-      nickname: nickname,
-      email: email,
-      bestScore: 0,
-      scores: []
-    });
+    try {
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        nickname: nickname,
+        email: email,
+        bestScore: 0,
+        scores: []
+      });
+      console.log("Document utilisateur créé dans Firestore");
+    } catch (firestoreError) {
+      console.error("Erreur lors de la création du document Firestore:", firestoreError);
+      // L'utilisateur est déjà créé, donc on continue sans bloquer
+    }
     
     alert("Inscription réussie !");
   } catch (error) {
-    console.error("Erreur lors de l'inscription:", error);
+    console.error("Erreur détaillée lors de l'inscription:", error);
+    
+    // Afficher l'erreur dans l'UI si la fonction existe
+    if (window.handleFirebaseError) {
+      window.handleFirebaseError(error);
+    }
+    
     if (error.code === 'auth/email-already-in-use') {
       alert("Cet email est déjà utilisé");
+    } else if (error.code === 'auth/invalid-email') {
+      alert("Format d'email invalide");
+    } else if (error.code === 'auth/weak-password') {
+      alert("Le mot de passe est trop faible (minimum 6 caractères)");
+    } else if (error.code === 'auth/network-request-failed') {
+      alert("Problème de connexion réseau. Vérifiez votre connexion internet.");
+    } else if (error.code === 'auth/configuration-not-found') {
+      alert("Erreur de configuration Firebase. Veuillez réessayer plus tard.");
     } else {
       alert("Erreur lors de l'inscription: " + error.message);
     }
@@ -134,10 +168,33 @@ loginBtn.addEventListener("click", async () => {
   }
   
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    console.log("Tentative de connexion pour:", email);
+    
+    if (!auth) {
+      throw new Error("Firebase Auth n'est pas initialisé correctement");
+    }
+    
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    console.log("Connexion réussie:", userCredential.user.uid);
   } catch (error) {
-    console.error("Erreur lors de la connexion:", error);
-    alert("Identifiants incorrects");
+    console.error("Erreur détaillée lors de la connexion:", error);
+    
+    // Afficher l'erreur dans l'UI si la fonction existe
+    if (window.handleFirebaseError) {
+      window.handleFirebaseError(error);
+    }
+    
+    if (error.code === 'auth/user-not-found') {
+      alert("Aucun compte ne correspond à cet email");
+    } else if (error.code === 'auth/wrong-password') {
+      alert("Mot de passe incorrect");
+    } else if (error.code === 'auth/invalid-email') {
+      alert("Format d'email invalide");
+    } else if (error.code === 'auth/configuration-not-found') {
+      alert("Erreur de configuration Firebase. Veuillez réessayer plus tard.");
+    } else {
+      alert("Identifiants incorrects ou problème de connexion");
+    }
   }
 });
 
