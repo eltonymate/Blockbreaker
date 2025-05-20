@@ -253,10 +253,9 @@ function updateUI(isLoggedIn) {
     setTimeout(() => {
       messageDisplay.textContent = "";
     }, 2000);
-    
-    // Démarrer le jeu si la fonction existe
-    if (typeof window.startGame === "function") {
-      window.startGame();
+      // Démarrer le jeu si la fonction existe
+    if (typeof window.initGame === "function") {
+      window.initGame();
     }
   } else {
     // Si l'utilisateur n'est pas connecté
