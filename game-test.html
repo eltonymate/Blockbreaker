@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test d'initialisation du jeu Block Breaker</title>
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      background-size: 400% 400%;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .status {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    
+    h1, h2 { color: #00f7ff; }
+    
+    canvas {
+      border: 2px solid #00f7ff;
+      background: #000;
+      display: block;
+      margin: 20px auto;
+      border-radius: 10px;
+    }
+    
+    button {
+      background: linear-gradient(to right, #00f7ff, #00d6e0);
+      border: none;
+      color: #000;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      font-weight: bold;
+    }
+    
+    pre {
+      text-align: left;
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 5px;
+      overflow: auto;
+      max-height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Test d'initialisation du jeu Block Breaker</h1>
+    
+    <div id="canvasContainer">
+      <canvas id="gameCanvas" width="480" height="320"></canvas>
+    </div>
+    
+    <div id="controls">
+      <button id="initTest">Tester l'initialisation du jeu</button>
+      <button id="drawTest">Tester le rendu graphique</button>
+      <button id="manualStart">Démarrer le jeu manuellement</button>
+    </div>
+    
+    <div id="gameInfo">
+      <div id="scoreBoard">Score: 0</div>
+      <div id="lives">Vies: 3</div>
+      <div id="level">Niveau: 1</div>
+    </div>
+    
+    <div id="message"></div>
+    <button id="restartBtn" style="display:none;">Rejouer</button>
+    
+    <h2>Résultats du diagnostic</h2>
+    <div id="diagnosticResult" class="status info">Cliquez sur "Tester l'initialisation du jeu" pour commencer</div>
+    
+    <h2>Journal de debug</h2>
+    <pre id="debugLog"></pre>
+  </div>
+  
+  <script>
+    // Fonction pour écrire dans le journal de debug
+    function log(message) {
+      const debugLog = document.getElementById('debugLog');
+      const time = new Date().toLocaleTimeString();
+      debugLog.textContent += `[${time}] ${message}\n`;
+      debugLog.scrollTop = debugLog.scrollHeight;
+    }
+    
+    // Fonction pour définir le statut du diagnostic
+    function setStatus(message, type) {
+      const diagnosticResult = document.getElementById('diagnosticResult');
+      diagnosticResult.textContent = message;
+      diagnosticResult.className = `status ${type}`;
+    }
+    
+    // Capture le gameCanvas et son contexte
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('scoreBoard');
+    const messageDisplay = document.getElementById('message');
+    const restartBtn = document.getElementById('restartBtn');
+    
+    // Variables du jeu
+    let paddleHeight = 12, paddleWidth = 75, paddleX;
+    let ballRadius = 8;
+    let x, y, dx, dy;
+    let rightPressed = false, leftPressed = false;
+    let score = 0, lives = 3, level = 1, gameRunning = true;
+    let isGameOver = false;
+    
+    // Configuration des couleurs et niveaux
+    const colors = ["#FF6F61", "#FFB400", "#00C896", "#4285F4"];
+    const levels = [
+      { rows: 3, cols: 5 },
+      { rows: 4, cols: 6 },
+      { rows: 5, cols: 7 }
+    ];
+    
+    // Variables pour les effets spéciaux
+    let bricks = [];
+    let trail = [];
+    
+    // Test d'initialisation du jeu
+    document.getElementById('initTest').addEventListener('click', function() {
+      log('Début du test d\'initialisation');
+      
+      try {
+        // Test des variables
+        if (typeof canvas === 'undefined' || canvas === null) {
+          throw new Error('Canvas non trouvé');
+        }
+        log('Canvas trouvé: ' + (canvas instanceof HTMLCanvasElement));
+        
+        if (typeof ctx === 'undefined' || ctx === null) {
+          throw new Error('Contexte Canvas non trouvé');
+        }
+        log('Contexte 2D disponible: ' + (ctx instanceof CanvasRenderingContext2D));
+        
+        // Test des fonctions
+        if (typeof setupLevel !== 'function') {
+          log('Définition de la fonction setupLevel');
+          window.setupLevel = function() {
+            const { rows, cols } = levels[level - 1];
+            bricks = [];
+            
+            for (let r = 0; r < rows; r++) {
+              bricks[r] = [];
+              for (let c = 0; c < cols; c++) {
+                bricks[r][c] = { x: 0, y: 0, status: 1 };
+              }
+            }
+            log('Niveau configuré: ' + level);
+          };
+        }
+        
+        if (typeof resetBallAndPaddle !== 'function') {
+          log('Définition de la fonction resetBallAndPaddle');
+          window.resetBallAndPaddle = function() {
+            paddleX = (canvas.width - paddleWidth) / 2;
+            x = canvas.width / 2;
+            y = canvas.height - 30;
+            dx = 3;
+            dy = -3;
+            trail = [];
+            log('Balle et raquette réinitialisées');
+          };
+        }
+        
+        if (typeof updateUI !== 'function') {
+          log('Définition de la fonction updateUI');
+          window.updateUI = function() {
+            scoreDisplay.textContent = `Score: ${score}`;
+            document.getElementById('lives').textContent = `Vies: ${lives}`;
+            document.getElementById('level').textContent = `Niveau: ${level}`;
+            log('Interface utilisateur mise à jour');
+          };
+        }
+        
+        if (typeof startGame !== 'function') {
+          log('Définition de la fonction startGame');
+          window.startGame = function() {
+            log('Fonction startGame appelée');
+            if (!gameRunning) {
+              score = 0;
+              lives = 3;
+              level = 1;
+              gameRunning = true;
+              isGameOver = false;
+              messageDisplay.textContent = "";
+              restartBtn.style.display = "none";
+              setupLevel();
+              resetBallAndPaddle();
+              updateUI();
+              draw();
+              log('Jeu démarré');
+            } else {
+              log('Le jeu est déjà en cours d\'exécution');
+            }
+          };
+        } else {
+          log('La fonction startGame existe déjà');
+        }
+        
+        // Export des fonctions pour le module global
+        window.setupLevel = setupLevel || window.setupLevel;
+        window.resetBallAndPaddle = resetBallAndPaddle || window.resetBallAndPaddle;
+        window.updateUI = updateUI || window.updateUI;
+        window.startGame = startGame || window.startGame;
+        window.getScore = () => score;
+        
+        setStatus('Initialisation réussie! Toutes les fonctions requises sont disponibles.', 'success');
+      } catch (error) {
+        log('ERREUR: ' + error.message);
+        setStatus('Erreur d\'initialisation: ' + error.message, 'error');
+      }
+    });
+    
+    // Test de rendu graphique
+    document.getElementById('drawTest').addEventListener('click', function() {
+      log('Test du rendu graphique');
+      
+      try {
+        // Effacer le canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dessiner une grille de debug
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 0.5;
+        
+        for (let x = 0; x < canvas.width; x += 20) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+        
+        for (let y = 0; y < canvas.height; y += 20) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
+        
+        // Dessiner une raquette
+        ctx.fillStyle = '#fff';
+        ctx.fillRect((canvas.width - 75) / 2, canvas.height - 12, 75, 12);
+        
+        // Dessiner une balle
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#00f7ff';
+        ctx.fill();
+        ctx.closePath();
+        
+        // Dessiner quelques briques
+        const brickWidth = 65;
+        const brickHeight = 20;
+        const brickPadding = 10;
+        const colors = ["#FF6F61", "#FFB400", "#00C896", "#4285F4"];
+        
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 5; c++) {
+            const brickX = c * (brickWidth + brickPadding) + 30;
+            const brickY = r * (brickHeight + brickPadding) + 30;
+            
+            ctx.fillStyle = colors[r % colors.length];
+            ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
+            ctx.strokeStyle = '#fff';
+            ctx.strokeRect(brickX, brickY, brickWidth, brickHeight);
+          }
+        }
+        
+        setStatus('Test de rendu graphique réussi!', 'success');
+        log('Rendu graphique terminé avec succès');
+      } catch (error) {
+        log('ERREUR dans le rendu graphique: ' + error.message);
+        setStatus('Erreur de rendu: ' + error.message, 'error');
+      }
+    });
+    
+    // Démarrage manuel du jeu
+    document.getElementById('manualStart').addEventListener('click', function() {
+      log('Tentative de démarrage manuel du jeu');
+      
+      try {
+        if (typeof window.startGame === 'function') {
+          window.startGame();
+          setStatus('Jeu démarré manuellement', 'success');
+        } else {
+          throw new Error('La fonction startGame n\'est pas disponible');
+        }
+      } catch (error) {
+        log('ERREUR lors du démarrage manuel: ' + error.message);
+        setStatus('Échec du démarrage manuel: ' + error.message, 'error');
+      }
+    });
+    
+    // Initialisation
+    log('Page chargée, attendant les tests...');
+  </script>
+</body>
+</html>

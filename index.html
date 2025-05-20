@@ -43,9 +43,11 @@
       <p>Email: <span id="userEmail"></span></p>
       <div id="bestScore">Meilleur score: <span id="bestScoreValue">0</span></div>
       <button id="logoutBtn">Déconnexion</button>
+    </div>    <div id="gameInfo">
+      <div id="scoreBoard">Score: 0</div>
+      <div id="lives">Vies: 3</div>
+      <div id="level">Niveau: 1</div>
     </div>
-
-    <div id="scoreBoard">Score: 0</div>
     <canvas id="gameCanvas" width="480" height="320"></canvas>
     <div id="message"></div>
     <button id="restartBtn" style="display:none;">Rejouer</button>
@@ -80,10 +82,10 @@
       errorMessage.style.display = "block";
     };
   </script>
-  
-  <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="firebase-config.js"></script>
   <script type="module" src="user-firebase.js"></script>
-  <script src="game.js"></script>
+  <script src="js/game/game.js"></script>
+  <script src="js/diagnostic.js"></script>
   
   <!-- Script d'initialisation pour les fonctions globales -->
   <script>
