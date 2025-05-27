@@ -107,6 +107,11 @@ let bricks = [];
 
 // Setup level based on current level number
 function setupLevel() {
+  // Controllo che il livello sia valido per evitare errori
+  if (level < 1 || level > levels.length) {
+    level = 1; // Reset al livello 1 se non valido
+  }
+  
   const { rows, cols } = levels[level - 1];
   bricks = [];
   
@@ -139,6 +144,12 @@ function setupLevel() {
 
 // Reset ball and paddle positions
 function resetBallAndPaddle() {
+  // Verifica che il canvas esista
+  if (!canvas) {
+    console.error("Erreur: Canvas non disponible lors de la réinitialisation");
+    return;
+  }
+  
   paddleX = (canvas.width - paddleWidth) / 2;
   x = canvas.width / 2;
   y = canvas.height - 30;
@@ -149,8 +160,12 @@ function resetBallAndPaddle() {
 
 // Draw trail effect behind the ball
 function drawTrail() {
+  if (!ctx || !trail || trail.length === 0) return;
+  
   for (let i = 0; i < trail.length; i++) {
     const t = trail[i];
+    if (!t) continue;
+    
     ctx.beginPath();
     ctx.arc(t.x, t.y, ballRadius * (1 - i / trail.length), 0, Math.PI * 2);
     ctx.fillStyle = `rgba(0, 247, 255, ${0.5 * (1 - i / trail.length)})`;
@@ -161,6 +176,8 @@ function drawTrail() {
 
 // Draw the ball
 function drawBall() {
+  if (!ctx) return;
+  
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
   ctx.fillStyle = "#00f7ff";
@@ -170,6 +187,8 @@ function drawBall() {
 
 // Draw the paddle
 function drawPaddle() {
+  if (!ctx || !canvas) return;
+  
   ctx.beginPath();
   ctx.roundRect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight, [10]);
   ctx.fillStyle = "#ffffff";
@@ -179,38 +198,51 @@ function drawPaddle() {
 
 // Draw the bricks
 function drawBricks() {
-  const { rows, cols } = levels[level - 1];
-  const brickWidth = (canvas.width - (cols + 1) * 10) / cols;
-  const brickHeight = 20;
+  if (!ctx || !canvas || !bricks || !levels || level < 1 || level > levels.length) return;
+  
+  try {
+    const { rows, cols } = levels[level - 1];
+    const brickWidth = (canvas.width - (cols + 1) * 10) / cols;
+    const brickHeight = 20;
 
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      const b = bricks[r][c];
-      if (b.status === 1) {
-        const brickX = c * (brickWidth + 10) + 10;
-        const brickY = r * (brickHeight + 10) + 30;
-        b.x = brickX;
-        b.y = brickY;
-        ctx.beginPath();
-        ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 10);
-        ctx.fillStyle = colors[r % colors.length];
-        ctx.fill();
-        ctx.closePath();
+    for (let r = 0; r < rows; r++) {
+      if (!bricks[r]) continue;
+      for (let c = 0; c < cols; c++) {
+        const b = bricks[r][c];
+        if (!b) continue;
+        if (b.status === 1) {
+          const brickX = c * (brickWidth + 10) + 10;
+          const brickY = r * (brickHeight + 10) + 30;
+          b.x = brickX;
+          b.y = brickY;
+          ctx.beginPath();
+          ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 10);
+          ctx.fillStyle = colors[r % colors.length];
+          ctx.fill();
+          ctx.closePath();
+        }
       }
     }
+  } catch (error) {
+    console.error("Errore durante il rendering dei blocchi:", error);
   }
 }
 
 // Detect collisions between ball and bricks
 function collisionDetection() {
-  const { cols } = levels[level - 1];
-  const brickWidth = (canvas.width - (cols + 1) * 10) / cols;
-  const brickHeight = 20;
+  if (!bricks || !levels || level < 1 || level > levels.length || !canvas) return;
+  
+  try {
+    const { cols } = levels[level - 1];
+    const brickWidth = (canvas.width - (cols + 1) * 10) / cols;
+    const brickHeight = 20;
 
-  for (let r = 0; r < bricks.length; r++) {
-    for (let c = 0; c < bricks[r].length; c++) {
-      const b = bricks[r][c];
-      if (b.status === 1) {
+    for (let r = 0; r < bricks.length; r++) {
+      if (!bricks[r]) continue;
+      for (let c = 0; c < bricks[r].length; c++) {
+        const b = bricks[r][c];
+        if (!b) continue;
+        if (b.status === 1) {
         if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
           dy = -dy;
           b.status = 0;
@@ -250,19 +282,21 @@ function collisionDetection() {
               // Game completed
               playGameWonSound();
               endGame("🎉 Félicitations, tu as terminé tous les niveaux !");
-            }
-          }
+            }          }
         }
       }
     }
+  }
+  } catch (error) {
+    console.error("Errore durante il controllo delle collisioni:", error);
   }
 }
 
 // Update UI elements (score, lives, level)
 function updateUI() {
-  scoreDisplay.textContent = `Score: ${score}`;
-  livesDisplay.textContent = `Vies: ${lives}`;
-  levelDisplay.textContent = `Niveau: ${level}`;
+  if (scoreDisplay) scoreDisplay.textContent = `Score: ${score}`;
+  if (livesDisplay) livesDisplay.textContent = `Vies: ${lives}`;
+  if (levelDisplay) levelDisplay.textContent = `Niveau: ${level}`;
 }
 
 // End the game
@@ -292,56 +326,65 @@ function endGame(msg) {
 // Main game loop
 function draw() {
   if (!gameRunning || isGameOver) return;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBricks();
-  drawTrail();
-  drawBall();
-  drawPaddle();
-  collisionDetection();
-
-  // Wall collision detection
-  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-    dx = -dx;
-    playWallHitSound();
+  if (!canvas || !ctx) {
+    console.error("Canvas o contesto non disponibile durante l'esecuzione del gioco");
+    return;
   }
-  if (y + dy < ballRadius) {
-    dy = -dy;
-    playWallHitSound();
-  } else if (y + dy > canvas.height - ballRadius) {
-    // Paddle collision detection
-    if (x > paddleX && x < paddleX + paddleWidth) {
-      // Calculate angle of reflection based on where the ball hits the paddle
-      const hitPoint = x - (paddleX + paddleWidth / 2);
-      dx = hitPoint * 0.15; // The further from center, the more angled the bounce
-      dy = -Math.abs(dy);
-      playPaddleHitSound();
-    } else {
-      // Ball missed the paddle
-      lives--;
-      playLifeLostSound();
-      updateUI();
-      if (lives === 0) {
-        endGame("💥 Game Over !");
+
+  try {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawTrail();
+    drawBall();
+    drawPaddle();
+    collisionDetection();
+
+    // Wall collision detection
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+      dx = -dx;
+      playWallHitSound();
+    }
+    if (y + dy < ballRadius) {
+      dy = -dy;
+      playWallHitSound();
+    } else if (y + dy > canvas.height - ballRadius) {
+      // Paddle collision detection
+      if (x > paddleX && x < paddleX + paddleWidth) {
+        // Calculate angle of reflection based on where the ball hits the paddle
+        const hitPoint = x - (paddleX + paddleWidth / 2);
+        dx = hitPoint * 0.15; // The further from center, the more angled the bounce
+        dy = -Math.abs(dy);
+        playPaddleHitSound();
       } else {
-        resetBallAndPaddle();
+        // Ball missed the paddle
+        lives--;
+        playLifeLostSound();
+        updateUI();
+        if (lives === 0) {
+          endGame("💥 Game Over !");
+        } else {
+          resetBallAndPaddle();
+        }
       }
     }
+
+    // Move paddle
+    if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
+    else if (leftPressed && paddleX > 0) paddleX -= 5;
+
+    // Update ball position
+    x += dx;
+    y += dy;
+
+    // Update trail effect
+    trail.unshift({ x, y });
+    if (trail.length > 15) trail.pop();
+
+    requestAnimationFrame(draw);
+  } catch (error) {
+    console.error("Errore durante il rendering del gioco:", error);
+    gameRunning = false;
   }
-
-  // Move paddle
-  if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
-  else if (leftPressed && paddleX > 0) paddleX -= 5;
-
-  // Update ball position
-  x += dx;
-  y += dy;
-
-  // Update trail effect
-  trail.unshift({ x, y });
-  if (trail.length > 15) trail.pop();
-
-  requestAnimationFrame(draw);
 }
 
 // Event listeners for keyboard controls
@@ -430,14 +473,22 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 
 // Function to initialize the game (without starting)
 function initGame() {
+  // Verifica che il canvas esista prima di inizializzare il gioco
+  if (!canvas || !ctx) {
+    console.error("Erreur: Canvas ou contexte non disponible");
+    return;
+  }
+
   isGameOver = false;
   gameRunning = false;
   score = 0;
   lives = 3;
   level = 1;
-  scoreDisplay.textContent = "Score: 0";
-  messageDisplay.textContent = "Cliquez sur 'Commencer' pour jouer";
-  restartBtn.style.display = "none";
+  
+  // Verifica che gli elementi dell'interfaccia esistano
+  if (scoreDisplay) scoreDisplay.textContent = "Score: 0";
+  if (messageDisplay) messageDisplay.textContent = "Cliquez sur 'Commencer' pour jouer";
+  if (restartBtn) restartBtn.style.display = "none";
   
   // Get the start button
   const startBtn = document.getElementById("startBtn");
@@ -445,27 +496,31 @@ function initGame() {
     startBtn.style.display = "inline-block";
   }
   
-  setupLevel();
-  resetBallAndPaddle();
-  updateUI();
-  
-  // Draw the initial state without animation
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Draw a semi-transparent overlay
-  ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-  // Draw the game elements in a paused state
-  drawBricks();
-  drawBall();
-  drawPaddle();
-  
-  // Draw "Press Start" message on canvas
-  ctx.fillStyle = "#00f7ff";
-  ctx.font = "bold 24px 'Segoe UI', sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("PRÊT À JOUER !", canvas.width / 2, canvas.height / 2);
+  try {
+    setupLevel();
+    resetBallAndPaddle();
+    updateUI();
+    
+    // Draw the initial state without animation
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw a semi-transparent overlay
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw the game elements in a paused state
+    drawBricks();
+    drawBall();
+    drawPaddle();
+    
+    // Draw "Press Start" message on canvas
+    ctx.fillStyle = "#00f7ff";
+    ctx.font = "bold 24px 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("PRÊT À JOUER !", canvas.width / 2, canvas.height / 2);
+  } catch (error) {
+    console.error("Erreur lors de l'initialisation du jeu:", error);
+  }
 }
 
 // Function to start the game

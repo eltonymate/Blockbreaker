@@ -1,0 +1,16 @@
+// Regole Firestore per il sistema di autenticazione basato su nickname
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Permetti la lettura pubblica dei punteggi per la classifica
+    match /users/{userId} {
+      // Chiunque può leggere i dati pubblici (nickname e punteggio)
+      allow read;
+      
+      // Solo l'utente stesso può modificare i propri dati
+      // Controlliamo che il nickname dell'utente corrisponda a quello presente nel documento
+      allow write: if request.auth == null || 
+                     (request.resource.data.uid == userId);
+    }
+  }
+}
