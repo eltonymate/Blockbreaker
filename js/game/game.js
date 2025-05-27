@@ -113,7 +113,26 @@ function setupLevel() {
   for (let r = 0; r < rows; r++) {
     bricks[r] = [];
     for (let c = 0; c < cols; c++) {
-      bricks[r][c] = { x: 0, y: 0, status: 1 };
+      let status = 1;
+      
+      // Level 1: Standard formation (all bricks)
+      // Level 2: Checkerboard pattern
+      if (level === 2 && (r + c) % 2 === 1) {
+        status = 0;
+      }
+        // Level 3: Inverted Pyramid formation (point down)
+      if (level === 3) {
+        // For inverted pyramid, we have more bricks at the top and fewer at the bottom
+        const maxColsInRow = Math.floor(cols * (rows - r) / rows);
+        const startCol = Math.floor((cols - maxColsInRow) / 2);
+        const endCol = startCol + maxColsInRow;
+        
+        if (c < startCol || c >= endCol) {
+          status = 0;
+        }
+      }
+      
+      bricks[r][c] = { x: 0, y: 0, status: status };
     }
   }
 }
@@ -176,9 +195,6 @@ function drawBricks() {
         ctx.roundRect(brickX, brickY, brickWidth, brickHeight, 10);
         ctx.fillStyle = colors[r % colors.length];
         ctx.fill();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "#fff";
-        ctx.stroke();
         ctx.closePath();
       }
     }
