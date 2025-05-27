@@ -138,16 +138,31 @@ button:hover {
   justify-content: center;
   align-items: center;
   min-height: 60vh;
+  perspective: 1000px;
 }
 
 #userPanel {
-  width: 300px;
+  width: 320px;
   margin: 20px auto;
-  padding: 25px;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 15px;
   border: 2px solid #00f7ff;
-  box-shadow: 0 0 30px rgba(0, 247, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 247, 255, 0.4);
+  backdrop-filter: blur(10px);
+  transform-style: preserve-3d;
+  animation: panelFloat 3s ease-in-out infinite;
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.form-footer {
+  margin-top: 25px;
+  font-size: 0.95em;
+  text-align: center;
 }
 
 #leaderboardSection {
@@ -201,28 +216,100 @@ button:hover {
 
 .user-section {
   margin-bottom: 20px;
+  transition: all 0.5s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.user-section.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  position: absolute;
+}
+
+.user-section h2 {
+  margin-bottom: 25px;
+  font-size: 1.8em;
+  text-shadow: 0 0 10px rgba(0, 247, 255, 0.8);
+  position: relative;
+}
+
+.user-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(to right, transparent, #00f7ff, transparent);
 }
 
 input {
   display: block;
   width: 100%;
-  padding: 8px;
-  margin: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #00f7ff;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 247, 255, 0.3);
+  background: rgba(255, 255, 255, 0.07);
   color: white;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  font-size: 1em;
+}
+
+input:focus {
+  outline: none;
+  border-color: #00f7ff;
+  box-shadow: 0 0 10px rgba(0, 247, 255, 0.5);
+  transform: translateY(-2px);
 }
 
 input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#loginBtn, #registerBtn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #00f7ff, #00a0a0);
+  color: #111;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+#loginBtn:hover, #registerBtn:hover {
+  background: linear-gradient(135deg, #00f7ff, #00c6c6);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+#loginBtn:active, #registerBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
 a {
   color: #00f7ff;
   text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(0, 247, 255, 0.8);
+}
+
+@keyframes panelFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }

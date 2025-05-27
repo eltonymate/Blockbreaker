@@ -7,27 +7,35 @@
 </head>
 <body>
   <h1>🎮 Block Breaker</h1>
-
   <!-- Section d'authentification (visible par défaut) -->
   <div id="authSection">
-    <div id="userPanel">      <div id="loginSection" class="user-section">
+    <div id="userPanel">
+      <div id="loginSection" class="user-section">
         <h2>Connexion</h2>
         <div id="loginForm">
-          <input type="text" id="loginNickname" placeholder="Nickname" required>
-          <input type="password" id="loginPassword" placeholder="Mot de passe" required>
+          <div class="input-container">
+            <input type="text" id="loginNickname" placeholder="Entrez votre nickname" required>
+          </div>
+          <div class="input-container">
+            <input type="password" id="loginPassword" placeholder="Entrez votre mot de passe" required>
+          </div>
           <button id="loginBtn">Se connecter</button>
         </div>
-        <p>Pas encore inscrit? <a href="#" id="showRegisterLink">S'inscrire</a></p>
+        <p class="form-footer">Pas encore inscrit? <a href="#" id="showRegisterLink">S'inscrire</a></p>
       </div>
 
       <div id="registerSection" class="user-section" style="display:none">
         <h2>Inscription</h2>
         <div id="registerForm">
-          <input type="text" id="registerNickname" placeholder="Nickname" required>
-          <input type="password" id="registerPassword" placeholder="Mot de passe" required>
+          <div class="input-container">
+            <input type="text" id="registerNickname" placeholder="Choisissez un nickname" required>
+          </div>
+          <div class="input-container">
+            <input type="password" id="registerPassword" placeholder="Créez un mot de passe" required>
+          </div>
           <button id="registerBtn">S'inscrire</button>
         </div>
-        <p>Déjà inscrit? <a href="#" id="showLoginLink">Se connecter</a></p>
+        <p class="form-footer">Déjà inscrit? <a href="#" id="showLoginLink">Se connecter</a></p>
       </div>
     </div>
   </div>
